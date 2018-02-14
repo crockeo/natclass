@@ -12,7 +12,7 @@ $ cd klasik
 $ python3 loader.py # or ./loader.py
 
 # From there, run main.py
-$ python3 main.py # or ./main.py
+$ python3 src/main.py # or ./src/main.py
 ```
 
 ### License
