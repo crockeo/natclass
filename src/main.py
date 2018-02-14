@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from parser import parse
+
 import features
 import models
 
@@ -12,13 +14,16 @@ def all_sat(constraint):
     return s
 
 def main():
-    only_plosive = models.ImplicationalConstraint({}, {
-        'continuant': '-',
-        'sonorant': '-',
-        'delayed release': '-'
-    })
+    # only_plosive = models.ImplicationalConstraint({}, {
+        # 'continuant': '-',
+        # 'sonorant': '-',
+        # 'delayed release': '-'
+    # })
 
-    only_voiceless = models.NegativeConstraint({ 'voice': '+' })
+    # only_voiceless = models.NegativeConstraint({ 'voice': '+' })
+
+    only_plosive = parse('[] => [-continuant, -sonorant, -delayed release]')
+    only_voiceless = parse('*[+voice]')
 
     sc = models.SetConstraint([
         only_plosive,
