@@ -18,7 +18,7 @@ feature_parser = seq(
         string('-'),
         string('0')
     ),
-    regex('\\w+').sep_by(whitespace).combine(lambda **args: ''.join(**args))
+    regex('\\w+').sep_by(whitespace).combine(lambda *args: ' '.join(args))
 ).combine(lambda value, feature:
     { feature: value }
 )
