@@ -36,7 +36,10 @@ class SetConstraint:
         self.constraints = __constraints
 
     def add(self, constraint):
-        self.constraints.add(constraint)
+        self.constraints.append(constraint)
+
+    def clear(self):
+        del self.constraints[:]
 
     def constrain(self, sound):
         for constraint in self.constraints:
