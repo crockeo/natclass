@@ -4,6 +4,7 @@ from parser import parse
 
 import features
 import models
+import server
 import sys
 
 def all_sat(constraint):
@@ -68,6 +69,8 @@ def interactive_mode():
 def main(args):
     if len(args) >= 2 and args[1] == 'oldmode':
         old_mode()
+    elif len(args) >= 2 and args[1] == 'server':
+        server.start()
     else:
         interactive_mode()
 
