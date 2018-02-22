@@ -1,31 +1,72 @@
+from parser import parse
 import json
 
-def get_features():
-    if get_features.features == {}:
+###
+# tag_sounds
+#
+# Given a set of sounds, tag them with the appropriate place, manner, and
+# voicing tags.
+def tag_sounds(sounds):
+    for k in place_constraints:
+        c = parse(place_constraints[k])
+
+        cs = constrained_sounds(sounds, c)
+        for s in cs:
+            sounds[s]['place'] = k
+
+    for k in manner_constraints:
+        c = parse(manner_constraints[k])
+
+        cs = constrained_sounds(sounds, c)
+        for s in cs:
+            sounds[s]['manner'] = k
+
+    return sounds
+
+###
+# get_sounds
+#
+# Get the set of sounds from the sounds.json file, tags them via
+# tag_sounds, and returns them. Memoizes the set of sounds.
+def get_sounds(tag = True):
+    if get_sounds.sounds == {}:
         f = open('features.json', 'r')
-        features = json.load(f)
-    return features
-get_features.features = {}
+        sounds = json.load(f)
+        if tag:
+            sounds = tag_sounds(sounds)
+    return sounds
+get_sounds.sounds = {}
+
+###
+# constrained_sounds
+#
+# Given a set of sounds, return the set that satisfies the constraint.
+def constrained_sounds(sounds, constraint):
+    s = []
+    for k in sounds:
+        if constraint.constrain(sounds[k]):
+            s.append(k)
+    return s
 
 ###
 # place_constraints
 #
 # A set of constraints that map directly from major class to phonetic place.
 place_constraints = {
-    'Bilabial': '[] => [+labial, -labiodental]',
-    'Labiodental': '[] => [+labidal, +labiodental]',
+    'Bilabial': '[] => [+labial, -labiodental, -syllabic]',
+    'Labiodental': '[] => [+labial, +labiodental, -syllabic]',
 
-    'Dental': '[] => [+coronal, +anterior, +distributed, -dorsal]',
-    'Alveolar': '[] => [+coronal, +anterior, -distributed]',
-    'Postalveolar': '[] => [+coronal, -anterior, +distributed]',
-    'Retroflex': '[] => [+coronal, -anterior, -distributed]',
-    'Alveolopalatal': '[+coronal, +anterior, +distributed, +dorsal]',
+    'Dental': '[] => [+coronal, +anterior, +distributed, -dorsal, -syllabic]',
+    'Alveolar': '[] => [+coronal, +anterior, -distributed, -syllabic]',
+    'Postalveolar': '[] => [+coronal, -anterior, +distributed, -syllabic]',
+    'Retroflex': '[] => [+coronal, -anterior, -distributed, -syllabic]',
+    'Alveolopalatal': '[] => [+coronal, +anterior, +distributed, +dorsal, -syllabic]',
 
-    'Palatal': '[] => [+coronal, +dorsal]',
-    'Velar': '[] => [-coronal, +dorsal, +high]',
-    'Uvular': '[] => [+dorsal, -high, -low]',
-    'Pharyngeal': '[] => [+dorsal, +low]',
-    'Glottal': '[] => [-labial, -coronal, -dorsal]'
+    'Palatal': '[] => [+coronal, +dorsal, -syllabic]',
+    'Velar': '[] => [-coronal, +dorsal, +high, -syllabic]',
+    'Uvular': '[] => [+dorsal, -high, -low, -syllabic]',
+    'Pharyngeal': '[] => [+dorsal, +low, -syllabic]',
+    'Glottal': '[] => [-labial, -coronal, -dorsal, -syllabic]'
 }
 
 ###
@@ -43,19 +84,10 @@ manner_constraints = {
     'Tap': '[] => [+tap]',
     'Trill': '[] => [+trill]',
 
-    'Approximant': '[] => [+approximant, +consonantal, -lateral]',
-    'Lateral Approximant': '[] => [+approximant, +consonantal, +lateral]',
+    'Approximant': '[] => [+approximant, +consonantal, -lateral, -tap, -trill]',
+    'Lateral Approximant': '[] => [+approximant, +consonantal, +lateral, -tap, -trill]',
 
-    'Glide': '[] => [-syllabic, +consonantal]',
+    'Glide': '[] => [-syllabic, -consonantal]',
 
     'Vowel': '[] => [+syllabic]'
-}
-
-###
-# voice_constraints
-#
-# A set of constraints that map directly from major class to voicing.
-voice_constraints = {
-    'voiced': '[] => [+voice]',
-    'voiceless': '[] => [-voice]'
 }
