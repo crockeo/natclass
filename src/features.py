@@ -29,6 +29,29 @@ place_constraints = {
 }
 
 ###
+# manner_constraints
+#
+# A set of constraints that map directly from major class to phonetic manner.
+manner_constraints = {
+    'Plosive': '[] => [-sonorant, -continuant, -delayed release]',
+    'Affricate': '[] => [-sonorant, -continuant, +delayed release]',
+    'Fricative': '[] => [-sonorant, +continuant, -lateral]',
+
+    'Lateral Fricative': '[] => [-sonorant, +continuant, +lateral]',
+
+    'Nasal': '[] => [+nasal]',
+    'Tap': '[] => [+tap]',
+    'Trill': '[] => [+trill]',
+
+    'Approximant': '[] => [+approximant, +consonantal, -lateral]',
+    'Lateral Approximant': '[] => [+approximant, +consonantal, +lateral]',
+
+    'Glide': '[] => [-syllabic, +consonantal]',
+
+    'Vowel': '[] => [+syllabic]'
+}
+
+###
 # voice_constraints
 #
 # A set of constraints that map directly from major class to voicing.
