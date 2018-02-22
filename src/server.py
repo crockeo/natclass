@@ -1,4 +1,4 @@
-from flask import Flask, Response, request
+from flask import Flask, Response, request, send_from_directory
 
 import features
 import models
@@ -25,11 +25,12 @@ def _all_sat(constraint):
 ###
 # _wrong_instance
 #
-# Generates a
+# Generates a failure response.
 def _wrong_instance():
     return Response(
         json.dumps({
-
+            'status': 'failure',
+            'data': 'No such instance.'
         }),
         status = 400,
         mimetype = 'application/json'
@@ -38,7 +39,8 @@ def _wrong_instance():
 ###
 # new_instance
 #
-# Provides the client with a new instance with which it can 
+# Provides the client with a new instance with which it can begin constraining
+# and/or querying.
 @app.route('/api/newinstance', methods = ['POST'])
 def new_instance():
     n = new_instance.instance
@@ -63,7 +65,7 @@ new_instance.instance = 0
 @app.route('/api/<int:instance>/sounds', methods = ['GET'])
 def current_sounds(instance):
     if instance not in instances:
-        return 'No such instance.', 400
+        return _wrong_instance()
 
     return Response(
         json.dumps({
@@ -81,14 +83,7 @@ def current_sounds(instance):
 @app.route('/api/<int:instance>/constraint', methods = ['POST'])
 def add_constraint(instance):
     if instance not in instances:
-        return Response(
-            json.dumps({
-                'status': 'failure',
-                'data': 'No such instance.'
-            }),
-            status = 400,
-            mimetype = 'application/json'
-        )
+        return _wrong_instance()
 
     fail = Response(
         json.dumps({
@@ -128,7 +123,7 @@ def add_constraint(instance):
 @app.route('/api/<int:instance>/clear', methods = ['POST'])
 def clear_constraints(instance):
     if instance not in instances:
-        return 'No such instance.', 400
+        return _wrong_instance()
     instances[instance].clear()
 
     return Response(
@@ -141,8 +136,29 @@ def clear_constraints(instance):
     )
 
 ###
+# index
+#
+# Returns the index.html page when viewing the root of the site.
+@app.route('/', methods = ['GET'])
+def index():
+    return send_from_directory('static', 'index.html')
+
+###
+# static_files
+#
+# Serves files from the user (if they exist) from the static/ folder.
+@app.route('/<path:path>', methods = ['GET'])
+def static_files(path):
+    return send_from_directory('static', path)
+
+###
 # start
 #
 # Starting the server.
-def start():
-    app.run('0.0.0.0', 8000)
+def start(debug = False):
+    app.run('0.0.0.0', 8000, debug = debug)
+
+# Executing the server directly, if run from this .py, rather than the normal
+# main.py
+if __name__ == '__main__':
+    start(True)
