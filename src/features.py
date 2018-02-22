@@ -27,3 +27,12 @@ place_constraints = {
     'Pharyngeal': '[] => [+dorsal, +low]',
     'Glottal': '[] => [-labial, -coronal, -dorsal]'
 }
+
+###
+# voice_constraints
+#
+# A set of constraints that map directly from major class to voicing.
+voice_constraints = {
+    'voiced': '[] => [+voice]',
+    'voiceless': '[] => [-voice]'
+}
