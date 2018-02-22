@@ -7,14 +7,6 @@ import models
 import server
 import sys
 
-def all_sat(constraint):
-    s = []
-    f = features.get_features()
-    for k in f:
-        if constraint.constrain(f[k]):
-            s.append(k)
-    return s
-
 ###
 # old_mode
 #
@@ -34,7 +26,7 @@ def old_mode():
         only_voiceless
     ])
 
-    l = all_sat(sc)
+    l = features.constrained_sounds(features.get_sounds(), sc)
     l.sort()
     for k in l:
         print(k)
@@ -61,8 +53,8 @@ def interactive_mode():
                 print(err)
                 continue
 
-            l = all_sat(sc)
-            l.sort()
+            l = features.constrained_sounds(features.get_sounds(), sc)
+            print(l)
             for k in l:
                 print(k)
 
