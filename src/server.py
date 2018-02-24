@@ -1,5 +1,6 @@
 from flask import Flask, Response, request, send_from_directory
 
+from parser import parse
 import features
 import models
 import flask
@@ -8,19 +9,6 @@ import json
 app = Flask(__name__)
 
 instances = {}
-
-###
-# _all_sat
-#
-# Produces the set of sounds that are produced from the current set of
-# constraints.
-def _all_sat(constraint):
-    s = []
-    f = features.get_features()
-    for k in f:
-        if constraint.constrain(f[k]):
-            s.append(k)
-    return s
 
 ###
 # _wrong_instance
@@ -70,7 +58,55 @@ def current_sounds(instance):
     return Response(
         json.dumps({
             'status': 'success',
-            'data': _all_sat(instances[instance])
+            'data': features.all_constrained_sounds(instances[instance])
+        }),
+        status = 200,
+        mimetype = 'application/json'
+    )
+
+###
+# current_places
+#
+# Returns all of the currently used places for the instance.
+@app.route('/api/<int:instance>/places', methods = ['GET'])
+def current_places(instance):
+    if instance not in instances:
+        return _wrong_instance()
+
+    places = set()
+    cs = features.all_constrained_sounds(instances[instance])
+    for k in cs:
+        if cs[k]['manner'] != 'Vowel':
+            places.add(cs[k]['place'])
+
+    return Response(
+        json.dumps({
+            'status': 'success',
+            'data': list(places)
+        }),
+        status = 200,
+        mimetype = 'application/json'
+    )
+
+###
+# current_manners
+#
+# Returns all of the currently used manners for the instance.
+@app.route('/api/<int:instance>/manners', methods = ['GET'])
+def current_manners(instance):
+    if instance not in instances:
+        return _wrong_instance()
+
+    manners = set()
+    cs = features.all_constrained_sounds(instances[instance])
+    for k in cs:
+        if cs[k]['manner'] != 'Vowel':
+            manners.add(cs[k]['manner'])
+
+    return Response(
+        json.dumps({
+            'status': 'success',
+            'data': list(manners)
         }),
         status = 200,
         mimetype = 'application/json'
@@ -99,18 +135,19 @@ def add_constraint(instance):
     except Exception as err:
         return fail
 
-    if r['constraint'] == None:
+    if r == None or 'constraint' not in r or r['constraint'] == None:
         return fail
 
     try:
         c = parse(r['constraint'])
     except Exception as err:
+        print(err)
         return fail
 
     instances[instance].add(c)
     return Response(
         json.dumps({
-
+            'status': 'success'
         }),
         status = 200,
         mimetype = 'application/json'

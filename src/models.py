@@ -1,3 +1,5 @@
+import copy
+
 # A constraint of the form *[ (class) ]
 class NegativeConstraint:
     def __init__(self, _natclass):
@@ -33,7 +35,7 @@ class ImplicationalConstraint:
 # constraints.
 class SetConstraint:
     def __init__(self, __constraints=[]):
-        self.constraints = __constraints
+        self.constraints = copy.copy(__constraints)
 
     def add(self, constraint):
         self.constraints.append(constraint)

@@ -42,11 +42,18 @@ get_sounds.sounds = {}
 #
 # Given a set of sounds, return the set that satisfies the constraint.
 def constrained_sounds(sounds, constraint):
-    s = []
+    s = {}
     for k in sounds:
         if constraint.constrain(sounds[k]):
-            s.append(k)
+            s[k] = sounds[k]
     return s
+
+###
+# all_constrained_sounds
+#
+# Equivalent to calling constrained_sounds(get_sounds()).
+def all_constrained_sounds(constraint):
+    return constrained_sounds(get_sounds(), constraint)
 
 ###
 # place_constraints
