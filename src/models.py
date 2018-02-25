@@ -1,3 +1,5 @@
+import copy
+
 # A constraint of the form *[ (class) ]
 class NegativeConstraint:
     def __init__(self, _natclass):
@@ -5,9 +7,9 @@ class NegativeConstraint:
 
     def constrain(self, sound):
         for v in self.natclass:
-            if sound[v] == self.natclass[v]:
-                return False
-        return True
+            if sound[v] != self.natclass[v]:
+                return True
+        return False
 
 # A constraint of the form [ (class1) ] => [ (class2) ]
 class ImplicationalConstraint:
@@ -33,7 +35,7 @@ class ImplicationalConstraint:
 # constraints.
 class SetConstraint:
     def __init__(self, __constraints=[]):
-        self.constraints = __constraints
+        self.constraints = copy.copy(__constraints)
 
     def add(self, constraint):
         self.constraints.append(constraint)

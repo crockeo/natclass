@@ -1,79 +1,38 @@
 (() => {
-  function xhttp(method, url, fn, data=null) {
-    x = new XMLHttpRequest();
-    
-    x.onreadystatechange = fn;
-    x.responseType = 'json';
-    x.open(method, url);
-    x.send();
-  }
+  ////
+  // placeOrder
+  //
+  // The the intended display order of the places received from the server.
+  placeOrder = {
+    'Bilabial': 0,
+    'Labiodental': 1,
+    'Dental': 2,
+    'Alveolar': 3,
+    'Postalveolar': 4,
+    'Retroflex': 5,
+    'Alveolopalatal': 6,
+    'Palatal': 7,
+    'Velar': 8,
+    'Uvular': 9,
+    'Pharyngeal': 10,
+    'Glottal': 11
+  };
 
   ////
-  // consonantChart
+  // mannerOrder
   //
-  // When provided with a phonological inventory, the consonantChart class
-  // generates a (Bootstrap-styled) HTML table with each of the consonants.
-  var consonantChart = {
-    props: {
-      inventory: []
-    },
-
-    data: () => {
-      return {
-        places: [],
-        manners: [],
-        sounds: {}
-      };
-    },
-
-    created() {
-      // TODO: Generate places and manners from inventory
-      //   - Modify server to provide places
-      //   - Modify server to provide manners
-      //   - Modify server to provide sounds with descriptions
-      this.places = [
-        'Bilabial',
-        'Alveolar',
-        'Velar'
-      ];
-
-      this.manners = [
-        'Plosive',
-        'Dental',
-        'Fricative'
-      ];
-
-      // TODO: Generate sounds from inventory.
-      this.sounds = {
-        'voiceless-Bilabial-Plosive': 'p',
-        'voiced-Bilabial-Plosive': 'b',
-        'voiceless-Alveolar-Plosive': 't',
-        'voiceless-Velar-Fricative': 'x'
-      };
-    },
-
-    template: `
-<table class="table">
-  <thead>
-    <tr>
-      <th></th>
-      <th v-for="place in places">
-        {{place}}
-      </th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <tr v-for="manner in manners">
-      <th>{{manner}}</th>
-      <td v-for="place in places">
-        <span class="text-left">{{sounds['voiceless-' + place + '-' + manner]}}</span>
-        <span class="text-right">{{sounds['voiced-' + place + '-' + manner]}}</span>
-      </th>
-    </tr>
-  </tbody>
-</table>
-`,
+  // The intended display order of the manners received from the server.
+  mannerOrder = {
+    'Plosive': 0,
+    'Affricate': 1,
+    'Fricative': 2,
+    'Lateral Fricative': 3,
+    'Nasal': 4,
+    'Trill': 5,
+    'Tap': 6,
+    'Approximant': 7,
+    'Lateral Approximant': 8,
+    'Glide': 9
   };
 
   ////
@@ -84,49 +43,105 @@
     el: '#app',
      
     data: {
+      places_loading: true,
+      manners_loading: true,
+      sounds_loading: true,
+
       instanceID: -1,
-      inventory: [],
+
+      sounds_raw: {},
+      sounds: {},
+
+      places: [],
+      manners: [],
 
       query: ''
     },
 
     methods: {
-      addConstraint: () => {
-        console.log(app.query);
-        // TODO: Submit POST request to server.
-      }
-    },
+      addConstraint() {
+        var self = this;
 
-    components: {
-      'consonant-chart': consonantChart
+        $.ajax(`/api/${self.instanceID}/constraint`, {
+          contentType: 'application/json',
+          data: JSON.stringify({ constraint: self.query }),
+          success: (response) => {
+            self.query = '';
+            self.updateInventory();
+          },
+          type: 'POST'
+        });
+      },
+      
+      clearConstraints() {
+        var self = this;
+        $.post(
+          `/api/${self.instanceID}/clear`,
+          (response) => self.updateInventory()
+        );
+      },
+
+      updateInventory() {
+        var self = this;
+
+        $.get(
+          `/api/${self.instanceID}/places`,
+          (response) => {
+            self.places = response.data;
+            self.places.sort((a, b) => {
+              return placeOrder[a] - placeOrder[b];
+            });
+
+            self.places_loading = false;
+          }
+        );
+
+        $.get(
+          `/api/${self.instanceID}/manners`,
+          (response) => {
+            self.manners = response.data;
+            self.manners.sort((a, b) => {
+              return mannerOrder[a] - mannerOrder[b];
+            });
+
+            self.manners_loading = false
+          }
+        );
+
+        $.get(
+          `/api/${self.instanceID}/sounds`,
+          (response) => {
+            self.raw_sounds = response.data;
+            self.sounds = {};
+
+            for (var k in self.raw_sounds)
+            {
+              var prefix;
+              if      (self.raw_sounds[k].voice === '+') prefix = 'voiced';
+              else if (self.raw_sounds[k].voice === '-') prefix = 'voiceless';
+
+              var key = prefix + '-' + self.raw_sounds[k].place + '-' + self.raw_sounds[k].manner;
+              if (self.sounds[key] === undefined)
+                self.sounds[key] = [];
+              self.sounds[key].push(k);
+            }
+
+            self.sounds_loading = false
+          }
+        );
+      }
     },
     
     created() {
-      var onLoad = {
-        instanceID: {
-          url: '/api/newinstance',
-          method: 'POST'
-        },
+      var self = this;
 
-        inventory: {
-          url: '/api/:instanceid/sounds',
-          method: 'GET',
-          data: {
-            instanceid: () => { return app.instanceID; }
-          }
-        }
-      }
-
-      xhttp(
-        'POST',
+      $.post(
         '/api/newinstance',
-        () => {
-          if (x.readyState === XMLHttpRequest.DONE && x.status === 200)
-          {
-            app.instanceID = x.response.data;
-          }
+        (response) => {
+          self.instanceID = response.data;
+          self.updateInventory();
         }
-      )
+      );
     }
   });
 })();
