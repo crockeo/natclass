@@ -31,7 +31,7 @@
 
       
       <div class="container-fluid">
-        <div v-if="loading">
+        <div v-if="places_loading || manners_loading || sounds_loading">
           <h3 class="text-secondary">Loading...</h3>
         </div>
 
@@ -39,7 +39,7 @@
           <thead>
             <tr>
               <th></th>
-              <th v-for="place in places">
+              <th class="text-center" colspan="2" v-for="place in places">
                 {{place}}
               </th>
             </tr>
@@ -49,10 +49,29 @@
             <tr v-for="manner in manners">
               <th>{{manner}}</th>
 
-              <td v-for="place in places">
-                {{sounds['voiceless-' + place + '-' + manner]}}
-                {{sounds['voiced-' + place + '-' + manner]}}
-              </td>
+              <template v-for="place in places">
+                <td>
+                  <div class="text-right" v-for="sound in sounds['voiceless-' + place + '-' + manner]">
+                    {{sound}}
+                  </div>
+                </td>
+
+                <td>
+                  <div class="text-left" v-for="sound in sounds['voiced-' + place + '-' + manner]">
+                    {{sound}}
+                  </div>
+                </td>
+              </template>
+
+              <!--<td v-for="place in places">-->
+                <!--<span v-for="sound in sounds['voiceless-' + place + '-' + manner]">-->
+                  <!--{{sound}}-->
+                <!--</span>-->
+
+                <!--<span v-for="sound in sounds['voiced-' + place + '-' + manner]">-->
+                  <!--{{sound}}-->
+                <!--</span>-->
+              <!--</td>-->
             </tr>
           </tbody>
         </table>

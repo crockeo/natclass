@@ -7,9 +7,9 @@ class NegativeConstraint:
 
     def constrain(self, sound):
         for v in self.natclass:
-            if sound[v] == self.natclass[v]:
-                return False
-        return True
+            if sound[v] != self.natclass[v]:
+                return True
+        return False
 
 # A constraint of the form [ (class1) ] => [ (class2) ]
 class ImplicationalConstraint:
