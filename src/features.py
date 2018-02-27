@@ -67,9 +67,10 @@ place_constraints = {
     'Alveolar': '[] => [+coronal, +anterior, -distributed, -syllabic]',
     'Postalveolar': '[] => [+coronal, -anterior, +distributed, -syllabic]',
     'Retroflex': '[] => [+coronal, -anterior, -distributed, -syllabic]',
-    'Alveolopalatal': '[] => [+coronal, +anterior, +distributed, +dorsal, -syllabic]',
 
-    'Palatal': '[] => [+coronal, +dorsal, -syllabic]',
+    'Alveolopalatal': '[] => [+coronal, +anterior, +distributed, +dorsal, -syllabic]',
+    'Palatal': '[] => [+coronal, +dorsal, -anterior, -syllabic]',
+
     'Velar': '[] => [-coronal, +dorsal, +high, -syllabic]',
     'Uvular': '[] => [+dorsal, -high, -low, -syllabic]',
     'Pharyngeal': '[] => [+dorsal, +low, -syllabic]',
